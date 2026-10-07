@@ -1,7 +1,10 @@
-name: CI
+name: CI/CD
 
-# Runs tests on every PR and push to main. Railway's GitHub autodeploy is configured with
-# "Wait for CI": a push to main is only deployed after this workflow succeeds.
+# PRs and pushes to main run the test suite and Docker builds.
+# Pushes to main then deploy both Railway services (MCP server + cron healthcheck) and
+# verify the public endpoint serves the new commit. Deploy needs the RAILWAY_TOKEN secret
+# (a Railway *project token* for onboarding-kb-mcp / production); without it the deploy job
+# is skipped with a notice.
 on:
   push:
     branches: [main]
@@ -12,6 +15,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  MCP_URL: https://onboarding-kb-mcp-production.up.railway.app
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,8 +25,8 @@ jobs:
       run:
         working-directory: mcp-server
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -34,14 +40,63 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build MCP image
         run: docker build -t kb-mcp .
       - name: Build healthcheck image
         run: docker build -f healthcheck/Dockerfile -t kb-healthcheck .
-      - name: Container smoke test
+      - name: Container smoke test (health + MCP initialize/tools/list/search)
         run: |
           docker run -d --name kb -p 8000:8000 -e KB_COMMIT=${{ github.sha }} kb-mcp
           for i in $(seq 1 30); do curl -fsS localhost:8000/health && break; sleep 1; done
           docker run --rm --network host -e MCP_URL=http://localhost:8000 \
             -e GITHUB_REPO=${{ github.repository }} -e SYNC_GRACE_MINUTES=100000 kb-healthcheck
+
+  deploy:
+    needs: [test, docker-build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check deploy credentials
+        id: creds
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::notice::RAILWAY_TOKEN secret not set - skipping Railway deploy"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install Railway CLI
+        if: steps.creds.outputs.ok == 'true'
+        run: npm install -g @railway/cli
+      - name: Deploy MCP service
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          echo "${{ github.sha }}" > KB_COMMIT
+          railway up --ci --service onboarding-kb-mcp
+      - name: Deploy cron healthcheck service
+        if: steps.creds.outputs.ok == 'true'
+        run: railway up --ci --service kb-healthcheck
+      - name: Verify public endpoint serves this commit
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          for i in $(seq 1 60); do
+            got=$(curl -fsS "$MCP_URL/health" | python -c "import sys,json;print(json.load(sys.stdin)['kb']['commit'])" || true)
+            [ "$got" = "${{ github.sha }}" ] && echo "serving ${got}" && exit 0
+            echo "waiting (serving: ${got:-?})"; sleep 10
+          done
+          echo "::error::public endpoint did not switch to ${{ github.sha }}"; exit 1
+      - uses: actions/setup-python@v6
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          python-version: "3.12"
+      - name: Post-deploy health / MCP / sync check
+        if: steps.creds.outputs.ok == 'true'
+        env:
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pip install -r healthcheck/requirements.txt && python healthcheck/check.py

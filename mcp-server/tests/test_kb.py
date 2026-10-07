@@ -69,3 +69,15 @@ def test_get_document(kb):
     assert kb.get_document("docs/02-onboarding/probation.md").startswith("# 试用期与转正")
     assert kb.get_document("02-onboarding/probation.md") is not None
     assert kb.get_document("docs/nope.md") is None
+
+
+def test_commit_resolution_order(tmp_path, monkeypatch):
+    from kb_mcp.kb import _resolve_commit
+
+    monkeypatch.delenv("KB_COMMIT", raising=False)
+    monkeypatch.setenv("RAILWAY_GIT_COMMIT_SHA", "railwaysha")
+    assert _resolve_commit(tmp_path) == "railwaysha"
+    (tmp_path / "KB_COMMIT").write_text("stampedsha\n")
+    assert _resolve_commit(tmp_path) == "stampedsha"
+    monkeypatch.setenv("KB_COMMIT", "envsha")
+    assert _resolve_commit(tmp_path) == "envsha"

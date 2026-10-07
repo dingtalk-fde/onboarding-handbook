@@ -70,5 +70,20 @@ curl -s $URL $H -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"nam
 
 ## 部署（Railway）
 
-- 服务 `onboarding-kb-mcp`：GitHub 仓库源，根目录 `Dockerfile` + `railway.toml`，健康检查 `/health`，开启 GitHub autodeploy + **Wait for CI**。
-- 定时服务 `kb-healthcheck`：同一仓库，配置文件 `healthcheck/railway.toml`，cron `*/15 * * * *`，运行 `healthcheck/check.py`（检查 `/health`、MCP initialize + tools/list + tools/call search、以及加载的 commit 与 GitHub main 是否一致），失败时非零退出。
+项目 `onboarding-kb-mcp`，两个服务都以本 GitHub 仓库为源（服务设置通过 Railway 控制台 / API 配置，不使用 config-as-code 文件）：
+
+| 服务 | 构建 | 运行 | 关键设置 |
+|------|------|------|----------|
+| `onboarding-kb-mcp` | 根目录 `Dockerfile` | 常驻，`python -m kb_mcp.server` | 健康检查 `/health`；变量 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`PORT=8000`；GitHub autodeploy（main） |
+| `kb-healthcheck` | `healthcheck/Dockerfile` | **Cron `*/15 * * * *`**，运行 `check.py` 后退出 | 变量 `MCP_URL`、`GITHUB_REPO`、`SYNC_GRACE_MINUTES`；重启策略 NEVER |
+
+`check.py` 检查：`/health` 正常且文档数达标 → MCP `initialize` + `tools/list` + `tools/call search` → 服务加载的 KB commit 与 GitHub `main` 最新 commit 一致（push 后 30 分钟内视为 PENDING-DEPLOY）。输出一行 `RESULT OK` / `RESULT FAIL`，失败时退出码非零。
+
+CI/CD（`.github/workflows/ci.yml`，名称 “CI/CD”）：
+- 触发：`pull_request`、push 到 `main`、手动 `workflow_dispatch`
+- `test`：pytest（分块/检索/回答 + 启动真实服务的 MCP 客户端冒烟测试）
+- `docker-build`：构建两个镜像，容器内跑一遍 healthcheck
+- `deploy`（仅 push 到 main，且前两个 job 通过）：`railway up --ci` 部署两个服务（写入 `KB_COMMIT` 标记），然后轮询 `/health` 直到线上 commit 等于本次提交，再跑一次完整健康/同步检查。需要仓库 Secret **`RAILWAY_TOKEN`**（Railway 项目 token，项目 onboarding-kb-mcp / production），未配置时该 job 打印提示并跳过。
+- 也可以改用 Railway 原生 GitHub autodeploy + **Wait for CI**：需在 GitHub 上为本仓库安装 Railway GitHub App。
+
+`.github/workflows/post-deploy.yml`：手动或 `deployment_status` 触发，对公网端点运行同样的检查。

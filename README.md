@@ -70,7 +70,6 @@ docs/                 手册正文（Markdown，按主题分目录）
 mcp-server/           MCP 问答服务（Python）+ 测试
 healthcheck/          Railway 定时任务：健康与同步检查
 Dockerfile            MCP 服务镜像（构建时打包 docs/）
-railway.toml          MCP 服务的 Railway 配置
 .github/workflows/    CI（测试 + 镜像构建）与部署后验证
 ```
 

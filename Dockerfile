@@ -6,6 +6,8 @@ WORKDIR /app
 COPY mcp-server/requirements.txt mcp-server/requirements.txt
 RUN pip install --no-cache-dir -r mcp-server/requirements.txt
 COPY docs docs
+# KB_COMMIT is stamped by the CI deploy job (railway up); README.md keeps the glob non-empty.
+COPY README.md KB_COMMIT* ./
 COPY mcp-server mcp-server
 WORKDIR /app/mcp-server
 # Warm jieba's dictionary cache so cold starts are fast.

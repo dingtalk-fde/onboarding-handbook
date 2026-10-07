@@ -123,6 +123,19 @@ def _git_commit(root: Path) -> str | None:
         return None
 
 
+def _resolve_commit(root: Path) -> str | None:
+    """Which git commit the bundled docs came from.
+
+    Order: $KB_COMMIT, a KB_COMMIT file stamped by CI (used for `railway up` deploys),
+    Railway's $RAILWAY_GIT_COMMIT_SHA (GitHub-sourced deploys), then the local git checkout."""
+    if os.environ.get("KB_COMMIT"):
+        return os.environ["KB_COMMIT"].strip()
+    stamp = root / "KB_COMMIT"
+    if stamp.is_file() and stamp.read_text().strip():
+        return stamp.read_text().strip()
+    return os.environ.get("RAILWAY_GIT_COMMIT_SHA") or _git_commit(root)
+
+
 @dataclass
 class KnowledgeBase:
     root: Path
@@ -159,7 +172,7 @@ class KnowledgeBase:
             raise ValueError(f"no markdown content under {docs_dir}")
         kb._bm25 = BM25Okapi(corpus)
         kb.content_hash = hasher.hexdigest()[:16]
-        kb.commit = os.environ.get("KB_COMMIT") or os.environ.get("RAILWAY_GIT_COMMIT_SHA") or _git_commit(root)
+        kb.commit = _resolve_commit(root)
         kb.loaded_at = time.time()
         return kb
 

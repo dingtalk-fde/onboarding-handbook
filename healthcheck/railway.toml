@@ -1,9 +1,0 @@
-# Config-as-code for the cron service (kb-healthcheck). Point the service's
-# "Config file path" at /healthcheck/railway.toml.
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "healthcheck/Dockerfile"
-
-[deploy]
-cronSchedule = "*/15 * * * *"
-restartPolicyType = "NEVER"
