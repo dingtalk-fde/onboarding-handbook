@@ -1,0 +1,24 @@
+name: Post-deploy verification
+
+# Railway reports each deployment back to GitHub as a Deployment. When the production
+# deployment succeeds, run the same health/sync check the Railway cron job runs.
+on:
+  deployment_status:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    if: github.event_name == 'workflow_dispatch' || github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r healthcheck/requirements.txt
+      - name: Health + MCP + sync check against the public endpoint
+        env:
+          MCP_URL: ${{ vars.MCP_URL }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python healthcheck/check.py
