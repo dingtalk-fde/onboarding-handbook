@@ -88,7 +88,7 @@ CI/CD（`.github/workflows/ci.yml`，名称 “CI/CD”）：
 - 触发：`pull_request`、push 到 `main`、手动 `workflow_dispatch`
 - `test`：pytest（分块/检索/回答 + 启动真实服务的 MCP 客户端冒烟测试）
 - `docker-build`：构建两个镜像，容器内跑一遍 healthcheck
-- `deploy`（仅 push 到 main，且前两个 job 通过）：`railway up --ci` 部署两个服务（写入 `KB_COMMIT` 标记），然后轮询 `/health` 直到线上 commit 等于本次提交，再跑一次完整健康/同步检查。需要仓库 Secret **`RAILWAY_TOKEN`**（Railway 项目 token，项目 onboarding-kb-mcp / production），未配置时该 job 打印提示并跳过。
-- 也可以改用 Railway 原生 GitHub autodeploy + **Wait for CI**：需在 GitHub 上为本仓库安装 Railway GitHub App。
+- `deploy`（仅 push 到 main，且前两个 job 通过）：**push 到 main 即自动部署**。用仓库 Secret `RAILWAY_TOKEN`（Railway 项目 token，onboarding-kb-mcp / production，已配置）执行 `railway up --ci` 部署 `onboarding-kb-mcp` 和 `kb-healthcheck` 两个服务（构建前写入 `KB_COMMIT` 标记本次 commit），然后轮询 `/health` 直到线上 commit 等于本次提交，再跑一次完整的健康/MCP/同步检查。任何一步失败，job 变红。
+- 不需要手动部署；Railway 侧未安装 GitHub App，因此部署完全由这个 job 触发（测试不过就不会部署）。如果 Secret 被删除，job 会打印提示并跳过部署，此时 `kb-healthcheck` 会在 push 30 分钟后报 “stale KB”。
 
 `.github/workflows/post-deploy.yml`：手动或 `deployment_status` 触发，对公网端点运行同样的检查。

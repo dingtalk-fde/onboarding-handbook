@@ -81,4 +81,4 @@ Dockerfile            MCP 服务镜像（构建时打包 docs/）
 
 ## 贡献
 
-制度有更新？直接提 PR 修改 `docs/` 下的文件。合并到 `main` 后，CI 通过即自动部署，问答服务几分钟内同步到最新内容。
+制度有更新？直接提 PR 修改 `docs/` 下的文件。合并到 `main` 后，GitHub Actions 先跑测试和镜像构建，通过后自动部署到 Railway（`RAILWAY_TOKEN` 驱动的 deploy job），问答服务几分钟内同步到最新内容；`kb-healthcheck` 每 15 分钟校验线上版本与 `main` 一致。
