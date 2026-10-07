@@ -2,6 +2,11 @@
 
 基于仓库 `docs/` 下 Markdown 制度文档的知识问答 MCP 服务。
 
+## 线上地址
+
+- MCP（Streamable HTTP）：`https://onboarding-kb-mcp-production.up.railway.app/mcp`
+- 健康检查：`https://onboarding-kb-mcp-production.up.railway.app/health`
+
 ## 架构
 
 ```
@@ -45,24 +50,24 @@ DEEPSEEK_API_KEY=sk-... python -m kb_mcp.server   # http://localhost:8000/mcp
 
 ## 接入 MCP 客户端
 
-Streamable HTTP 端点：`https://<your-domain>/mcp`
+Streamable HTTP 端点：`https://onboarding-kb-mcp-production.up.railway.app/mcp`
 
 Cursor / Claude Desktop 等（`mcp.json`）：
 
 ```json
 {
   "mcpServers": {
-    "onboarding-handbook": { "url": "https://<your-domain>/mcp" }
+    "onboarding-handbook": { "url": "https://onboarding-kb-mcp-production.up.railway.app/mcp" }
   }
 }
 ```
 
-仅支持 stdio 的客户端可借助 `mcp-remote`：`npx mcp-remote https://<your-domain>/mcp`。
+仅支持 stdio 的客户端可借助 `mcp-remote`：`npx mcp-remote https://onboarding-kb-mcp-production.up.railway.app/mcp`。
 
 用 curl 直接调用：
 
 ```bash
-URL=https://<your-domain>/mcp
+URL=https://onboarding-kb-mcp-production.up.railway.app/mcp
 H='-H Content-Type:application/json -H Accept:application/json,text/event-stream'
 curl -s $URL $H -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"1"}}}'
 curl -s $URL $H -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"ask","arguments":{"question":"试用期多久？"}}}'

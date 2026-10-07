@@ -61,6 +61,12 @@
 - 生成：DeepSeek（OpenAI 兼容 API），只依据检索到的片段作答并标注 `[n]` 出处；未配置 Key 时退化为返回原文片段
 - 工具：`ask(question)`、`search(query, top_k)`、`list_topics()`、`get_document(path)`
 
+**线上端点**：`https://onboarding-kb-mcp-production.up.railway.app/mcp`（健康检查 `/health`）
+
+```json
+{ "mcpServers": { "onboarding-handbook": { "url": "https://onboarding-kb-mcp-production.up.railway.app/mcp" } } }
+```
+
 详见 [mcp-server/README.md](mcp-server/README.md)。
 
 ## 仓库结构
