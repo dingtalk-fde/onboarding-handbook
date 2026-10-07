@@ -24,7 +24,7 @@ log.warning("knowledge base loaded: %s", KB.stats())
 mcp = FastMCP(
     name="onboarding-handbook",
     instructions=(
-        "星河云帆科技《新人入职手册》知识库。用 ask 直接提问获得带出处的答案；"
+        "Real Niubility（FDE 模式的电商 AI Agent 公司）《新人入职手册》知识库。用 ask 直接提问获得带出处的答案；"
         "用 search 获取原文片段；用 list_topics / get_document 浏览手册。"
     ),
     host=os.environ.get("HOST", "0.0.0.0"),

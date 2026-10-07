@@ -1,4 +1,4 @@
-# onboarding-handbook MCP 服务
+# onboarding-handbook MCP 服务（Real Niubility 新人入职手册问答）
 
 基于仓库 `docs/` 下 Markdown 制度文档的知识问答 MCP 服务。
 
@@ -75,11 +75,11 @@ curl -s $URL $H -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"nam
 
 ## 部署（Railway）
 
-项目 `onboarding-kb-mcp`，两个服务都以本 GitHub 仓库为源（服务设置通过 Railway 控制台 / API 配置，不使用 config-as-code 文件）：
+项目 `onboarding-kb-mcp`，两个服务都由 GitHub Actions 的 deploy job 用 `railway up` 从本仓库构建部署（服务设置通过 Railway 控制台 / API 配置，不使用 config-as-code 文件）：
 
 | 服务 | 构建 | 运行 | 关键设置 |
 |------|------|------|----------|
-| `onboarding-kb-mcp` | 根目录 `Dockerfile` | 常驻，`python -m kb_mcp.server` | 健康检查 `/health`；变量 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`PORT=8000`；GitHub autodeploy（main） |
+| `onboarding-kb-mcp` | 根目录 `Dockerfile` | 常驻，`python -m kb_mcp.server` | 健康检查 `/health`；变量 `DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`PORT=8000`；由 CI deploy job 部署（push 到 main） |
 | `kb-healthcheck` | `healthcheck/Dockerfile` | **Cron `*/15 * * * *`**，运行 `check.py` 后退出 | 变量 `MCP_URL`、`GITHUB_REPO`、`SYNC_GRACE_MINUTES`；重启策略 NEVER |
 
 `check.py` 检查：`/health` 正常且文档数达标 → MCP `initialize` + `tools/list` + `tools/call search` → 服务加载的 KB commit 与 GitHub `main` 最新 commit 一致（push 后 30 分钟内视为 PENDING-DEPLOY）。输出一行 `RESULT OK` / `RESULT FAIL`，失败时退出码非零。

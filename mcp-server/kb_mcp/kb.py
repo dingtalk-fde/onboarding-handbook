@@ -21,6 +21,7 @@ jieba.setLogLevel(logging.WARNING)
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 MAX_CHUNK_CHARS = 1200
+MAX_CHUNKS_PER_DOC = 2
 
 # Tokens that carry no retrieval signal.
 _STOPWORDS = set(
@@ -183,7 +184,19 @@ class KnowledgeBase:
             return []
         scores = self._bm25.get_scores(q)
         ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
-        return [(self.chunks[i], scores[i]) for i in ranked[:top_k] if scores[i] > 0]
+        # Diversify: at most MAX_CHUNKS_PER_DOC chunks from one document, so a
+        # single long doc can't crowd out other relevant docs in the top-k.
+        out: list[tuple[Chunk, float]] = []
+        per_doc: dict[str, int] = {}
+        for i in ranked:
+            if scores[i] <= 0 or len(out) >= top_k:
+                break
+            path = self.chunks[i].path
+            if per_doc.get(path, 0) >= MAX_CHUNKS_PER_DOC:
+                continue
+            per_doc[path] = per_doc.get(path, 0) + 1
+            out.append((self.chunks[i], scores[i]))
+        return out
 
     def topics(self) -> list[dict]:
         groups: dict[str, list[dict]] = {}

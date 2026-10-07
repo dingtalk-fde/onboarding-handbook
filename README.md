@@ -1,8 +1,8 @@
-# 星河云帆科技 · 新人入职手册（Onboarding Handbook）
+# Real Niubility · 新人入职手册（Onboarding Handbook）
 
-> ⚠️ 本仓库中的公司“星河云帆科技（NebulaSail）”、人员、邮箱、电话、地址均为**虚构**，用于演示“制度文档知识库 + MCP 知识问答服务”。
+> ⚠️ 本仓库中的公司“Real Niubility”、人员、邮箱、电话、地址均为**虚构**，用于演示“制度文档知识库 + MCP 知识问答服务”。
 
-欢迎加入星河云帆！这里汇集了新人入职需要知道的一切：组织架构、入职流程、考勤请假、报销福利、IT 与权限、研发规范、沟通文化、安全保密和办事渠道。
+欢迎加入 Real Niubility！Real Niubility 是一家 FDE 模式的 AI Agent 公司，为电商品牌商家和代运营服务商（淘宝/天猫、京东、抖音电商、拼多多）定制垂直 AI Agent，约 160 人，总部杭州。这里汇集了新人入职需要知道的一切：组织架构、入职流程、考勤请假、报销福利与驻场差旅、IT 与权限、研发与客户交付规范、沟通文化、安全保密和办事渠道。
 
 **不想翻文档？** 直接问 MCP 知识问答服务（见下方[知识问答 MCP](#知识问答-mcp)）。
 
@@ -26,7 +26,7 @@
 - [工作时间与考勤](docs/03-attendance-leave/working-hours.md) · [假期类型与审批](docs/03-attendance-leave/leave-types.md) · [加班、调休与值班](docs/03-attendance-leave/overtime.md)
 
 ### 04 报销与福利
-- [费用报销制度](docs/04-expenses-benefits/reimbursement.md) · [差旅标准](docs/04-expenses-benefits/travel-policy.md)
+- [费用报销制度](docs/04-expenses-benefits/reimbursement.md) · [差旅与驻场标准](docs/04-expenses-benefits/travel-policy.md)
 - [福利与保险](docs/04-expenses-benefits/benefits-insurance.md) · [补贴与津贴](docs/04-expenses-benefits/allowances.md)
 
 ### 05 IT 设备与权限
@@ -34,21 +34,22 @@
 - [研发系统权限开通](docs/05-it-access/dev-access.md) · [IT 服务台与 SLA](docs/05-it-access/it-service-sla.md)
 
 ### 06 研发规范与流程
-- [技术栈与系统地图](docs/06-engineering/tech-stack.md) · [代码规范](docs/06-engineering/coding-standards.md) · [Git 分支模型](docs/06-engineering/git-workflow.md)
-- [代码评审](docs/06-engineering/code-review.md) · [CI/CD 与发布](docs/06-engineering/ci-cd-release.md) · [On-call 与故障处理](docs/06-engineering/oncall-incident.md)
+- [技术栈与系统地图](docs/06-engineering/tech-stack.md) · [代码与 Prompt 规范](docs/06-engineering/coding-standards.md) · [Git 分支模型](docs/06-engineering/git-workflow.md)
+- [代码评审](docs/06-engineering/code-review.md) · [CI/CD 与评测门禁](docs/06-engineering/ci-cd-release.md) · [On-call 与故障处理](docs/06-engineering/oncall-incident.md)
+- [FDE 客户交付流程（PoC → 上线）](docs/06-engineering/fde-delivery-process.md)
 
 ### 07 会议与沟通
 - [会议文化](docs/07-communication/meeting-culture.md) · [沟通规范](docs/07-communication/communication-norms.md) · [OKR 与绩效](docs/07-communication/okr-performance.md)
 
 ### 08 安全与保密
 - [数据分级](docs/08-security/data-classification.md) · [保密协议与规定](docs/08-security/confidentiality-nda.md)
-- [安全事件上报](docs/08-security/security-incident.md) · [设备与网络使用规范](docs/08-security/acceptable-use.md)
+- [客户数据安全与驻场安全](docs/08-security/client-data-security.md) · [安全事件上报](docs/08-security/security-incident.md) · [设备与网络使用规范](docs/08-security/acceptable-use.md)
 
 ### 09 办事渠道
 - [常用办事渠道与联系方式](docs/09-service-channels/contacts.md) · [行政服务指南](docs/09-service-channels/admin-services.md)
 
 ### 10 FAQ
-- [综合篇](docs/10-faq/faq-general.md) · [研发篇](docs/10-faq/faq-engineering.md)
+- [综合篇](docs/10-faq/faq-general.md) · [研发 / FDE 篇](docs/10-faq/faq-engineering.md)
 
 ---
 

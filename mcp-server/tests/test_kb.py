@@ -45,12 +45,18 @@ def test_kb_loads_all_docs(kb):
     [
         ("试用期多久", "docs/02-onboarding/probation.md"),
         ("报销审批链", "docs/04-expenses-benefits/reimbursement.md"),
-        ("SailGate VPN 连不上", "docs/05-it-access/vpn-network.md"),
+        ("NiuGate VPN 连不上", "docs/05-it-access/vpn-network.md"),
         ("P0 故障等级定义", "docs/06-engineering/oncall-incident.md"),
         ("出差住宿标准 一线城市", "docs/04-expenses-benefits/travel-policy.md"),
         ("周五可以发布生产吗 封网", "docs/06-engineering/ci-cd-release.md"),
         ("年假怎么折算", "docs/03-attendance-leave/leave-types.md"),
         ("数据分级 L4 绝密", "docs/08-security/data-classification.md"),
+        ("驻场补贴多少钱一天", "docs/04-expenses-benefits/travel-policy.md"),
+        ("PoC 验收 评测集", "docs/06-engineering/fde-delivery-process.md"),
+        ("聚石塔 订单数据 消费者信息", "docs/08-security/client-data-security.md"),
+        ("技术主管是谁", "docs/01-org/org-chart.md"),
+        ("评测门禁 合规用例", "docs/06-engineering/ci-cd-release.md"),
+        ("客户数据泄露 上报", "docs/08-security/security-incident.md"),
     ],
 )
 def test_retrieval_top3_contains_expected_doc(kb, question, expected_path):
@@ -81,3 +87,14 @@ def test_commit_resolution_order(tmp_path, monkeypatch):
     assert _resolve_commit(tmp_path) == "stampedsha"
     monkeypatch.setenv("KB_COMMIT", "envsha")
     assert _resolve_commit(tmp_path) == "envsha"
+
+
+def test_search_diversifies_documents(kb):
+    from kb_mcp.kb import MAX_CHUNKS_PER_DOC
+
+    hits = kb.search("审批", top_k=10)
+    counts: dict[str, int] = {}
+    for c, _ in hits:
+        counts[c.path] = counts.get(c.path, 0) + 1
+    assert max(counts.values()) <= MAX_CHUNKS_PER_DOC
+    assert len(counts) >= 5

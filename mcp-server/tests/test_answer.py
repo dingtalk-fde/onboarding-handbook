@@ -47,7 +47,13 @@ def test_answer_empty_and_no_hits(kb):
 @pytest.mark.skipif(not os.environ.get("DEEPSEEK_API_KEY"), reason="DEEPSEEK_API_KEY not set")
 @pytest.mark.parametrize(
     "question,must_contain",
-    [("试用期多久？", "6"), ("报销 2000 元以下找谁审批？", "郑可")],
+    [
+        ("试用期多久？", "6"),
+        ("报销 2000 元以下找谁审批？", "郑可"),
+        ("报销 3 万元需要谁审批？", "须莫"),
+        ("公司的 CEO 是谁？", "冬翔"),
+        ("驻场补贴每天多少钱？", "150"),
+    ],
 )
 def test_live_deepseek_answer(kb, question, must_contain):
     out = answer(kb, question)
